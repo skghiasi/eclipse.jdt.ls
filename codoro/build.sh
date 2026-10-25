@@ -19,7 +19,9 @@ NAME="jdt-language-server-${BASE_VERSION}-codoro.${REVISION}.tar.gz"
 
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/.." && pwd)
-out=${1:-$PWD/dist}
+out=${1:-dist}
+mkdir -p "$out"
+out=$(cd "$out" && pwd)   # absolute: the archive is written from inside another directory
 javac=${JAVA_HOME:+$JAVA_HOME/bin/}javac
 jar_tool=${JAVA_HOME:+$JAVA_HOME/bin/}jar
 command -v "$javac" >/dev/null || { echo "no javac: set JAVA_HOME to a JDK 21 or newer" >&2; exit 1; }
@@ -36,7 +38,7 @@ listed=$(sort "$here/patched-sources.txt")
 
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
-mkdir -p "$out" "$work/tree" "$work/classes"
+mkdir -p "$work/tree" "$work/classes"
 
 echo "downloading the official archive"
 curl -fsSL --retry 3 -o "$work/official.tar.gz" "$OFFICIAL_URL"
