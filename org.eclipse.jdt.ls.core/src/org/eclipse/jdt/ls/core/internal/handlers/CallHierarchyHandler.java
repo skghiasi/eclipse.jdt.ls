@@ -234,8 +234,12 @@ public class CallHierarchyHandler {
 	private Range getRange(IOpenable openable, CallLocation location) {
 		int[] start = JsonRpcHelpers.toLine(openable, location.getStart());
 		int[] end = JsonRpcHelpers.toLine(openable, location.getEnd());
-		Assert.isNotNull(start, "start");
-		Assert.isNotNull(end, "end");
+		if (start == null || end == null) {
+			// A caller in a library class has no source to convert the offsets against: the class file's buffer
+			// is empty or not built yet, so the conversion has nothing to read. That is no reason to fail the
+			// whole request, and so no range is reported for this location.
+			return new Range(new Position(0, 0), new Position(0, 0));
+		}
 		// Assert.isLegal(start[0] == end[0], "Expected equal start and end lines. Start was: " + Arrays.toString(start) + " End was:" + Arrays.toString(end));
 		Range callRange = new Range(new Position(start[0], start[1]), new Position(end[0], end[1]));
 		return callRange;
