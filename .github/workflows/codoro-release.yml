@@ -1,0 +1,28 @@
+# Builds codoro's jdtls and attaches it to a release when a tag like v1.61.0-codoro.1 is pushed.
+name: codoro release
+on:
+  push:
+    tags: ['v*-codoro.*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the build compares this tree with the upstream release tag
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: build
+        run: |
+          export CODORO_REVISION="${GITHUB_REF_NAME##*-codoro.}"
+          codoro/build.sh dist
+      - name: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" \
+            --notes "Eclipse JDT Language Server with codoro's changes (see CODORO-PATCHES.txt in the archive). SHA-256: $(cut -d' ' -f1 dist/*.sha256)"
