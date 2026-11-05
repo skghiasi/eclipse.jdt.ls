@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Batch file facts extension for the Java language server
+Bundle-SymbolicName: jdtls.batchfacts;singleton:=true
+Bundle-Version: 0.1.0
+Bundle-Vendor: Minty Byte
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.ls.core,
+ org.eclipse.lsp4j
+Bundle-ActivationPolicy: lazy

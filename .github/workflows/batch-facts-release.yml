@@ -1,0 +1,28 @@
+# Builds the archive and attaches it to a release when a tag like v1.61.0-batch.1 is pushed.
+name: batch facts release
+on:
+  push:
+    tags: ['v*-batch.*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the build compares this tree with the upstream release tag
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: build
+        run: |
+          export ARCHIVE_REVISION="${GITHUB_REF_NAME##*-batch.}"
+          batch-facts/build.sh dist
+      - name: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" \
+            --notes "Eclipse JDT Language Server with this fork's changes (see PATCHES.txt in the archive). SHA-256: $(cut -d' ' -f1 dist/*.sha256)"
